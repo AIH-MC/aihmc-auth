@@ -15,8 +15,9 @@ public class HttpHandler {
 
     public static void postPlayerData(String baseUrl, String token, Player player, ComponentLogger logger) {
         String uuid = player.getUniqueId().toString();
+        String trimmedUuid = uuid.replace("-", "");
         String name = player.getUsername();
-        String json = String.format("{\"uuid\":\"%s\", \"username\":\"%s\"}", uuid, name);
+        String json = String.format("{\"uuid\":\"%s\", \"username\":\"%s\"}", trimmedUuid, name);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/figura/register"))
