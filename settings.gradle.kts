@@ -1,4 +1,4 @@
-rootProject.name = "PluginName"
+rootProject.name = "AIHMC"
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
