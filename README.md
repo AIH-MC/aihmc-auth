@@ -1,10 +1,4 @@
-# VelocityPluginTemplate
-
-[![Discord](https://img.shields.io/discord/899740810956910683?color=7289da&label=Discord)](https://discord.gg/5NMMzK5mAn)
-
-Description Here
-
-## Installation
-- Download YourPlugin from Modrinth
-- Drag and drop on your plugins folder
-- Start the server
+# AIH MC Auth
+自己服务器定制的登录插件，同时支持正版登录和外置登录直接进服，离线登录玩家自动触发指令登录，并且离线登录玩家无法使用正版登录或外置登录已有玩家名。
+# 注意事项
+该插件需要配合专用后端使用，后端稍后开源。
