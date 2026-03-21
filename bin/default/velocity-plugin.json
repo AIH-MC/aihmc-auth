@@ -1,0 +1,1 @@
+{"id":"aihmc-auth","name":"AIHMC Auth","version":"1.0.0","description":"A Velocity Auth Plugin for AIHMC","authors":["Erythrocyte3803"],"dependencies":[],"main":"top.aihmc.auth.VelocityPlugin"}

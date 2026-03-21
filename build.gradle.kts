@@ -30,6 +30,11 @@ tasks {
 
 sourceSets {
     main {
+        resources {
+            srcDirs("src/main/resources")
+            // 如果你还有其他资源目录
+            // srcDirs("src/main/assets")
+        }
         blossom {
             javaSources {
                 property("version", project.version.toString())
@@ -38,4 +43,27 @@ sourceSets {
     }
 }
 
+// 确保资源被正确打包
+tasks.processResources.configure {
+    // 确保资源被复制
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    // 如果有需要在资源中替换的变量
+    val replaceTokens = mapOf(
+        "version" to project.version.toString(),
+        "name" to project.name
+    )
+
+    filesMatching(listOf("*.yml", "*.yaml", "*.json", "*.properties")) {
+        expand(replaceTokens)
+    }
+
+    // 从源目录复制到输出目录
+    from(sourceSets.main.get().resources.srcDirs) {
+        include("**/*")
+    }
+    into(layout.buildDirectory.dir("resources/main"))
+}
+
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+
