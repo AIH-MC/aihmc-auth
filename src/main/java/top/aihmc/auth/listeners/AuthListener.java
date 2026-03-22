@@ -43,6 +43,7 @@ public class AuthListener {
         String urlName = apiBaseUrl + "/auth/api/users/profiles/minecraft/" + username;
         String urlProfile = apiBaseUrl + "/auth/sessionserver/session/minecraft/profile/" + puuid;
         String urlCheck = apiBaseUrl + "/offline/check/" + username; // 新增：检查离线玩家是否已注册
+        String apiCheck = apiBaseUrl;
         String accessToken = configManager.getAccessToken();
 
         // 使用现有的 HttpProvider 工具类发起请求
@@ -52,14 +53,21 @@ public class AuthListener {
                 HttpProvider.get(urlProfile, AuthBody.class, null);
         CompletableFuture<HttpProvider.ApiResponse<CheckResponse>> checkReq =
                 HttpProvider.get(urlCheck, CheckResponse.class, accessToken); // 新增：检查离线玩家
+        CompletableFuture<HttpProvider.ApiResponse<CheckResponse>> apicheckReq =
+                HttpProvider.get(apiCheck, CheckResponse.class, accessToken); 
 
         // 等待所有结果返回并执行逻辑分流
-        PreLoginEvent.PreLoginComponentResult result = CompletableFuture.allOf(nameReq, profileReq, checkReq)
+        PreLoginEvent.PreLoginComponentResult result = CompletableFuture.allOf(nameReq, profileReq, checkReq, apicheckReq)
                 .thenApply(v -> {
                     HttpProvider.ApiResponse<AuthBody> nameRes = nameReq.join();
                     HttpProvider.ApiResponse<AuthBody> profileRes = profileReq.join();
                     HttpProvider.ApiResponse<CheckResponse> checkRes = checkReq.join(); // 新增：获取检查结果
-
+                    HttpProvider.ApiResponse<CheckResponse> apicheckRes = apicheckReq.join();
+                    if (apicheckRes.statusCode != 200){
+                        return PreLoginEvent.PreLoginComponentResult.denied(
+                            messageManager.getMessage("backend-error")
+                        );
+                    }
                     if (nameRes.statusCode == 200 && profileRes.statusCode == 204) {
                         String source = (nameRes.body != null && nameRes.body.source != null) ? 
                                 nameRes.body.source : "未知认证源";

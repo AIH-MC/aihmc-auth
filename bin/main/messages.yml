@@ -109,3 +109,6 @@
     command-migrate-usage: "<yellow>用法：/aihmc migrate <原UUID> <新UUID>"
     command-rename-usage: "<yellow>用法：/aihmc rename <新玩家名>"
 
+    # 后端错误
+    backend-error: "<red>验证服务器故障或维护中，暂时无法进服，详情请联系管理员！"
+

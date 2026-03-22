@@ -156,6 +156,9 @@ public class MessageManager {
                              command-rstname-server-error: "<red>重置名称失败：服务器内部错误"
                              command-rstname-network-error: "<red>重置名称失败：网络或服务器错误"
                              resetname-console-success: "<gray>[AIH-MC Auth] 玩家 %player% (UUID: %uuid%) 重置名称成功"
+
+                             # 后端错误
+                             backend-error: "<red>验证服务器故障或维护中，暂时无法进服，详情请联系管理员！"
                            """;
 
         Files.writeString(messagePath, defaultMessages);
