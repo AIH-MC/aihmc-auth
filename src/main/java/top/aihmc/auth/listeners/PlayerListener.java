@@ -29,8 +29,6 @@ public class PlayerListener {
 
     // 用于跟踪已显示Title的玩家，避免重复显示
     private final Set<UUID> playersWithTitleShown = new HashSet<>();
-    // 用于记录已经提交过Figura注册的玩家，避免重复提交
-    private final Set<UUID> figuraRegisteredPlayers = new HashSet<>(); // 新增字段
 
     public PlayerListener(ProxyServer proxyServer, ConfigManager configManager,
             MessageManager messageManager, AuthValidationManager validationManager,
@@ -47,8 +45,6 @@ public class PlayerListener {
         Player player = event.getPlayer();
         String serverName = event.getServer().getServerInfo().getName();
         UUID playerId = player.getUniqueId();
-
-        submitFiguraRegistration(player);
 
         // 从配置获取服务器名称
         Map<String, Object> configData = configManager.getConfigData();
@@ -223,7 +219,6 @@ public class PlayerListener {
         playerStateManager.logout(playerId, username);
         validationManager.clearAttempts(playerId);
         playersWithTitleShown.remove(playerId);
-        figuraRegisteredPlayers.remove(playerId);
     }
 
     // 公共方法供命令类调用
@@ -234,60 +229,6 @@ public class PlayerListener {
         playersWithTitleShown.remove(playerId);
         // 清除玩家的Title显示
         player.clearTitle();
-    }
-
-    private void submitFiguraRegistration(Player player) {
-        UUID playerId = player.getUniqueId();
-        String username = player.getUsername();
-
-        // 检查是否已经提交过，避免重复提交
-        if (figuraRegisteredPlayers.contains(playerId)) {
-            return;
-        }
-
-        // 构建请求数据
-        Map<String, String> figuraRequest = new HashMap<>();
-        figuraRequest.put("uuid", playerId.toString().replace("-",""));
-        figuraRequest.put("username", username);
-
-        // 构建请求URL和token
-        String apiUrl = configManager.getApiUrl();
-        String accessToken = configManager.getAccessToken();
-        String figuraUrl = apiUrl + "/figura/register";
-
-        // 发送Figura注册请求
-        CompletableFuture<HttpProvider.ApiResponse<FiguraResponse>> figuraFuture = HttpProvider.post(figuraUrl,
-                figuraRequest, FiguraResponse.class, accessToken);
-
-        figuraFuture.thenAccept(response -> {
-            if (response.statusCode == 200) {
-                // 注册成功，标记为已注册
-                figuraRegisteredPlayers.add(playerId);
-
-                // 向玩家发送成功消息
-                player.sendMessage(
-                        messageManager.getMessage("figura-register-success"));
-
-                // 可选：记录到日志
-                proxyServer.getConsoleCommandSource().sendMessage(
-                        Component.text("[AIH-MC Auth] " + username + " 的Figura注册已提交成功"));
-            } else {
-                // 注册失败，记录但不影响玩家登录
-                proxyServer.getConsoleCommandSource().sendMessage(
-                        Component.text("[AIH-MC Auth] " + username + " 的Figura注册提交失败，状态码: " + response.statusCode));
-
-                // 检查是否有具体的错误消息
-                if (response.body != null && response.body.detail != null && response.body.detail.message != null) {
-                    proxyServer.getConsoleCommandSource().sendMessage(
-                            Component.text("[AIH-MC Auth] 错误信息: " + response.body.detail.message));
-                }
-            }
-        }).exceptionally(ex -> {
-            // 网络或处理异常
-            proxyServer.getConsoleCommandSource().sendMessage(
-                    Component.text("[AIH-MC Auth] " + username + " 的Figura注册提交异常: " + ex.getMessage()));
-            return null;
-        });
     }
 
     public boolean isPlayerLoggedIn(Player player) {
@@ -313,17 +254,6 @@ public class PlayerListener {
         return serverType;
     }
 
-    private static class FiguraResponse {
-        Detail detail;
-
-        static class Detail {
-            String message;
-        }
-
-        // Gson需要默认构造函数
-        public FiguraResponse() {
-        }
-    }
 
     @SuppressWarnings("unchecked")
     private List<String> getAllowedCommands() {
